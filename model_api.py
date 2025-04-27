@@ -1,12 +1,18 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import pickle
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Load the trained model
-model = pickle.load(open('model\energy_model.pkl', 'rb'))
+model = pickle.load(open('model/energy_model.pkl', 'rb'))
+
+# Load dataset once at startup to get all countries
+data = pd.read_csv('data/cleaned_final_data.csv', encoding='utf-8', delimiter=',')
+all_countries = sorted(data['country'].unique().tolist())
 
 @app.route('/')
 def index():
@@ -25,14 +31,8 @@ def predict():
 
 def predict_energy(country, year):
     try:
-        # Load dataset just to get all countries
-        data = pd.read_csv('data\cleaned_final_data.csv', encoding='utf-8', delimiter=',')
-
-        if country not in data['country'].unique():
+        if country not in all_countries:
             return "No data available for this country."
-
-        # Get sorted list of countries used during model training
-        all_countries = sorted(data['country'].unique().tolist())
 
         # One-hot encode the country
         country_encoded = [1 if c == country else 0 for c in all_countries]
