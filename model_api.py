@@ -1,15 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 import pickle
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 app = Flask(__name__)
 
 # Load the trained model
-model = pickle.load(open('model/energy_model.pkl', 'rb'))
+model = pickle.load(open('model\energy_model.pkl', 'rb'))
 
 @app.route('/')
 def index():
-    return "Please use the /predict endpoint with POST request."
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -18,14 +19,14 @@ def predict():
         country = data['country']
         year = int(data['year'])
         prediction = predict_energy(country, year)
-        return jsonify({'prediction': prediction})
+        return jsonify({'prediction': f"{prediction}"})
     except Exception as e:
         return jsonify({'prediction': f'Error: {str(e)}'}), 400
 
 def predict_energy(country, year):
     try:
         # Load dataset just to get all countries
-        data = pd.read_csv('cleaned_final_data.csv', encoding='utf-8', delimiter=',')
+        data = pd.read_csv('data\cleaned_final_data.csv', encoding='utf-8', delimiter=',')
 
         if country not in data['country'].unique():
             return "No data available for this country."
@@ -46,6 +47,6 @@ def predict_energy(country, year):
 
     except Exception as e:
         return f"Prediction error: {str(e)}"
-
+        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
