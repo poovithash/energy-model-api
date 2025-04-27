@@ -11,7 +11,7 @@ CORS(app)  # Enable CORS for all routes
 model = pickle.load(open('model/energy_model.pkl', 'rb'))
 
 # Load dataset once at startup to get all countries
-data = pd.read_csv('data/cleaned_final_data.csv', encoding='utf-8', delimiter=',')
+data = pd.read_csv('cleaned_final_data.csv', encoding='utf-8', delimiter=',')
 all_countries = sorted(data['country'].unique().tolist())
 
 @app.route('/')
